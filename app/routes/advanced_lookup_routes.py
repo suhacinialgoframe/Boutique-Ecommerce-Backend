@@ -2,7 +2,10 @@ from fastapi import APIRouter
 from app.database.connection import database
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/advanced-lookup",
+    tags=["Advanced Lookup"]
+)
 
 
 users_collection = database["users"]
