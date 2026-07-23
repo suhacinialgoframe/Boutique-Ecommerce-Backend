@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.database.connection import database
 
+
 router = APIRouter()
 
 products_collection = database["products"]
@@ -26,7 +27,15 @@ def products_by_category():
 
     result = list(products_collection.aggregate(pipeline))
 
+
+    for item in result:
+
+        if "_id" in item:
+            item["_id"] = str(item["_id"])
+
+
     return result
+
 
 
 # =====================================================
@@ -47,16 +56,21 @@ def average_product_price():
         }
     ]
 
+
     result = list(products_collection.aggregate(pipeline))
 
+
     if result:
+
         return {
             "average_price": result[0]["average_price"]
         }
 
+
     return {
         "average_price": 0
     }
+
 
 
 # =====================================================
@@ -77,17 +91,32 @@ def maximum_price_product():
         }
     ]
 
+
     result = list(products_collection.aggregate(pipeline))
+
 
     if result:
 
-        result[0]["_id"] = str(result[0]["_id"])
+        product = result[0]
 
-        return result[0]
+
+        # Convert MongoDB ObjectId
+        if "_id" in product:
+            product["_id"] = str(product["_id"])
+
+
+        if "category_id" in product:
+            product["category_id"] = str(product["category_id"])
+
+
+        return product
+
+
 
     return {
         "message": "No products found"
     }
+
 
 
 # =====================================================
@@ -114,9 +143,14 @@ def inventory_value():
         }
     ]
 
+
     result = list(products_collection.aggregate(pipeline))
 
+
     for product in result:
-        product["_id"] = str(product["_id"])
+
+        if "_id" in product:
+            product["_id"] = str(product["_id"])
+
 
     return result

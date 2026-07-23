@@ -30,7 +30,6 @@ def create_product(
     }
 
 
-
 # =====================================================
 # GET ALL PRODUCTS
 # =====================================================
@@ -43,6 +42,10 @@ def get_products():
     for product in products_collection.find():
 
         product["_id"] = str(product["_id"])
+
+        if "category_id" in product:
+            product["category_id"] = str(product["category_id"])
+
         products.append(product)
 
     return products
@@ -51,7 +54,6 @@ def get_products():
 
 # =====================================================
 # PRODUCT SEARCH + FILTER + SORT + PAGINATION
-# KEEP THIS BEFORE /products/{id}
 # =====================================================
 
 @router.get("/products/search")
@@ -68,8 +70,6 @@ def search_products(
     query = {}
 
 
-    # Search by name
-
     if name:
         query["name"] = {
             "$regex": name,
@@ -77,15 +77,9 @@ def search_products(
         }
 
 
-
-    # Filter by category
-
     if category_id:
         query["category_id"] = category_id
 
-
-
-    # Filter by price
 
     if min_price is not None or max_price is not None:
 
@@ -94,13 +88,9 @@ def search_products(
         if min_price is not None:
             query["price"]["$gte"] = min_price
 
-
         if max_price is not None:
             query["price"]["$lte"] = max_price
 
-
-
-    # Pagination
 
     skip = (page - 1) * limit
 
@@ -108,42 +98,31 @@ def search_products(
     products_cursor = products_collection.find(query)
 
 
-
-    # Sorting
-
     if sort_by:
 
         if sort_by == "price_asc":
-
             products_cursor = products_cursor.sort(
                 "price",
                 1
             )
-
 
         elif sort_by == "price_desc":
-
             products_cursor = products_cursor.sort(
                 "price",
                 -1
             )
 
-
         elif sort_by == "stock_asc":
-
             products_cursor = products_cursor.sort(
                 "stock",
                 1
             )
 
-
         elif sort_by == "stock_desc":
-
             products_cursor = products_cursor.sort(
                 "stock",
                 -1
             )
-
 
 
     products_cursor = products_cursor.skip(skip).limit(limit)
@@ -155,8 +134,11 @@ def search_products(
     for product in products_cursor:
 
         product["_id"] = str(product["_id"])
-        products.append(product)
 
+        if "category_id" in product:
+            product["category_id"] = str(product["category_id"])
+
+        products.append(product)
 
 
     return {
@@ -170,7 +152,6 @@ def search_products(
 
 # =====================================================
 # GET PRODUCT BY ID
-# KEEP THIS AFTER /search
 # =====================================================
 
 @router.get("/products/{id}")
@@ -186,6 +167,9 @@ def get_product(id: str):
     if product:
 
         product["_id"] = str(product["_id"])
+
+        if "category_id" in product:
+            product["category_id"] = str(product["category_id"])
 
         return product
 
